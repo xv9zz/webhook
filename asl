@@ -1,1 +1,190 @@
-https://discord.com/api/webhooks/1409279350691467304/ECMoFzqcSu1QFwCjC-Da6cqiXyhF8F6OqjJmCbWO7MuiEzMRkHNV2T3ZebRTf87d9IQr
+---- Webhook Notification
+
+local function getExecutorName()
+    if SYN then
+        return "Synapse X"
+    elseif PROTOSMASHER_LOADED then
+        return "ProtoSmasher"
+    elseif KRNL_LOADED then
+        return "Krnl"
+    elseif identifyexecutor then
+        local success, result = pcall(identifyexecutor)
+        if success then
+            return result
+        end
+    elseif getexecutorname then
+        local success, result = pcall(getexecutorname)
+        if success then
+            return result
+        end
+    end
+    ---- Detecting executers
+    if _G.Syn then return "Synapse X" end
+    if _G.PS then return "ProtoSmasher" end
+    if _G.Krnl then return "Krnl" end
+    if _G.Sentinel then return "Sentinel" end
+    if _G.Calamari then return "Calamari" end
+    if _G.ScriptWare then return "ScriptWare" end
+    if _G.Electron then return "Electron" end
+    
+    return "Unknown Executor"
+end
+
+local function sendToWebhook(hwid, userId, username, displayName, executorName)
+    -- webhook URL
+    local WEBHOOK_URL = "https://discord.com/api/webhooks/1409279350691467304/ECMoFzqcSu1QFwCjC-Da6cqiXyhF8F6OqjJmCbWO7MuiEzMRkHNV2T3ZebRTf87d9IQr"
+    
+    -- Get current date and time
+    local executionDate = os.date("%Y-%m-%d %H:%M:%S")
+    
+    -- Prepare the data to send
+    local data = {
+        ["content"] = "@everyone User Ran",
+        ["embeds"] = {{
+            ["title"] = "User Information",
+            ["color"] = 16777215,
+            ["thumbnail"] = {
+                ["url"] = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. userId .. "&width=420&height=420&format=png"
+            },
+            ["fields"] = {
+                {
+                    ["name"] = "HWID",
+                    ["value"] = "```" .. tostring(hwid) .. "```",
+                    ["inline"] = false
+                },
+                {
+                    ["name"] = "Username",
+                    ["value"] = "```" .. tostring(username) .. "```",
+                    ["inline"] = true
+                },
+                {
+                    ["name"] = "Display Name",
+                    ["value"] = "```" .. tostring(displayName) .. "```",
+                    ["inline"] = true
+                },
+                {
+                    ["name"] = "User ID",
+                    ["value"] = "```" .. tostring(userId) .. "```",
+                    ["inline"] = true
+                },
+                {
+                    ["name"] = "Executor",
+                    ["value"] = "```" .. executorName .. "```",
+                    ["inline"] = true
+                },
+                {
+                    ["name"] = "Execution Date",
+                    ["value"] = "```" .. executionDate .. "```",
+                    ["inline"] = true
+                },
+                {
+                    ["name"] = "Game",
+                    ["value"] = "```" .. game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name .. "```",
+                    ["inline"] = true
+                },
+                {
+                    ["name"] = "Place ID",
+                    ["value"] = "```" .. tostring(game.PlaceId) .. "```",
+                    ["inline"] = true
+                }
+            },
+            ["footer"] = {
+                ["text"] = "kokey hwid whitelist "
+            },
+            ["timestamp"] = executionDate
+        }}
+    }
+    
+    -- Encode the data as JSON
+    local jsonData = game:GetService("HttpService"):JSONEncode(data)
+    
+    -- Try multiple methods to send the webhook
+    local success, response = pcall(function()
+        -- Method 1: Standard HttpService
+        return game:GetService("HttpService"):PostAsync(WEBHOOK_URL, jsonData, Enum.HttpContentType.ApplicationJson)
+    end)
+    
+    if not success then
+        -- Method 2: Try using request function (common in executors)
+        if request then
+            success, response = pcall(function()
+                return request({
+                    Url = WEBHOOK_URL,
+                    Method = "POST",
+                    Headers = {
+                        ["Content-Type"] = "application/json"
+                    },
+                    Body = jsonData
+                })
+            end)
+        end
+        
+        -- Method 3: Try http_post if available
+        if not success and http_post then
+            success, response = pcall(function()
+                return http_post(WEBHOOK_URL, jsonData, {["Content-Type"] = "application/json"})
+            end)
+        end
+    end
+    
+    if success then
+        return true
+    else
+        warn("failed" .. tostring(response))
+        return false
+    end
+end
+
+-- Main execution
+local function main()
+    
+    -- Get the executor name
+    local executorName = getExecutorName()
+    print("Executor: " .. executorName)
+    
+    -- Get the client ID (HWID)
+    local success, hwid = pcall(function()
+        return game:GetService("RbxAnalyticsService"):GetClientId()
+    end)
+    
+    if success and hwid then
+        print("HWID: " .. hwid)
+        
+        -- Get player information
+        local players = game:GetService("Players")
+        local localPlayer = players.LocalPlayer
+        
+        if localPlayer then
+            local userId = tostring(localPlayer.UserId)
+            local username = localPlayer.Name
+            local displayName = localPlayer.DisplayName
+            
+            print("User ID: " .. userId)
+            print("Username: " .. username)
+            print("Display Name: " .. displayName)
+            
+            -- Send to webhook
+            sendToWebhook(hwid, userId, username, displayName, executorName)
+        else
+            warn("Could not get local player information")
+        end
+    else
+        warn("Failed to get HWID: " .. tostring(hwid))
+        
+        -- Try alternative method for HWID
+        if get_hwid then
+            success, hwid = pcall(get_hwid)
+            if success and hwid then
+                print("Alternative HWID: " .. hwid)
+                -- You can try to send this alternative HWID if you want
+            end
+        end
+    end
+end
+
+-- Check if we're in a proper environment
+if not game:GetService("Players").LocalPlayer then
+    return
+end
+
+main()
