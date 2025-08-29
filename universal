@@ -1,4 +1,24 @@
----- Webhook Notification
+-- Webhook Configuration
+local webhookConfig = {
+    type = "d", -- Default to Mau webhook
+}
+
+-- Override with user configuration if provided
+if getgenv().webhookconfig then
+    for key, value in pairs(getgenv().webhookconfig) do
+        webhookConfig[key] = value
+    end
+end
+
+-- Webhook URLs mapping
+local webhookUrls = {
+    ASL = "https://discord.com/api/webhooks/1409279350691467304/ECMoFzqcSu1QFwCjC-Da6cqiXyhF8F6OqjJmCbWO7MuiEzMRkHNV2T3ZebRTf87d9IQr",
+    Utility = "https://discord.com/api/webhooks/1409968900938006719/bvEsXAWaJ7n7XQGMaVxQxkb5wBomXGhQOs1fu6MnWjzwMUX6gb8ei6t6tY7CrOe1eo3n",
+    Mau = "https://discord.com/api/webhooks/1410700677239275531/s0bMIXOlxmsI963w-z3OgWvkp3sTO993QQ46NUNUian0dzn7okebRGrgd1f_jrue9djk"
+}
+
+-- Get the webhook URL based on configuration
+local WEBHOOK_URL = webhookUrls[webhookConfig.type] or webhookUrls.Mau
 
 local function getExecutorName()
     if SYN then
@@ -31,9 +51,6 @@ local function getExecutorName()
 end
 
 local function sendToWebhook(hwid, userId, username, displayName, executorName)
-    -- webhook URL
-    local WEBHOOK_URL = "https://discord.com/api/webhooks/1410700677239275531/s0bMIXOlxmsI963w-z3OgWvkp3sTO993QQ46NUNUian0dzn7okebRGrgd1f_jrue9djk"
-    
     -- Get current date and time
     local executionDate = os.date("%Y-%m-%d %H:%M:%S")
     
