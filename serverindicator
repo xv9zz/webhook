@@ -32,7 +32,7 @@ end
 
 local function sendToWebhook(userId, username, displayName, executorName)
     -- webhook URL
-    local WEBHOOK_URL = "https://discord.com/api/webhooks/1412875290467893258/WMV4wLbEWc8bCg74AqCUNmpRtGuJnMXMNNOZ_8mdceHBrzu40s14G-yAHosFHezVBmZ2"
+    local WEBHOOK_URL = "https://discord.com/api/webhooks/1412878658049409044/mTKT4uMWr7pE3x0OxKZGEA_aW57YQusF7NYNjLM5u18drGaoYiALN9z8j1uDiYdbNqYo"
     
     -- Get current date and time
     local executionDate = os.date("%Y-%m-%d %H:%M:%S")
@@ -42,7 +42,7 @@ local function sendToWebhook(userId, username, displayName, executorName)
     
     -- Prepare the data to send
     local data = {
-        ["content"] = "Mio joined a game.",
+        ["content"] = "<@&1412876583332610049> Mio joined a game.",
         ["username"] = "Mio Status",
         ["avatar_url"] = "https://i.pinimg.com/1200x/d5/a3/34/d5a334b9ed0ec71c902de05dbed9069b.jpg",
         ["embeds"] = {{
