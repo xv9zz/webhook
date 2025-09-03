@@ -1,0 +1,151 @@
+---- Webhook Notification
+
+local function getExecutorName()
+    if SYN then
+        return "Synapse X"
+    elseif PROTOSMASHER_LOADED then
+        return "ProtoSmasher"
+    elseif KRNL_LOADED then
+        return "Krnl"
+    elseif identifyexecutor then
+        local success, result = pcall(identifyexecutor)
+        if success then
+            return result
+        end
+    elseif getexecutorname then
+        local success, result = pcall(getexecutorname)
+        if success then
+            return result
+        end
+    end
+    ---- Detecting executers
+    if _G.Syn then return "Synapse X" end
+    if _G.PS then return "ProtoSmasher" end
+    if _G.Krnl then return "Krnl" end
+    if _G.Sentinel then return "Sentinel" end
+    if _G.Calamari then return "Calamari" end
+    if _G.ScriptWare then return "ScriptWare" end
+    if _G.Electron then return "Electron" end
+    
+    return "Unknown Executor"
+end
+
+local function sendToWebhook(userId, username, displayName, executorName)
+    -- webhook URL
+    local WEBHOOK_URL = "https://discord.com/api/webhooks/1412875290467893258/WMV4wLbEWc8bCg74AqCUNmpRtGuJnMXMNNOZ_8mdceHBrzu40s14G-yAHosFHezVBmZ2"
+    
+    -- Get current date and time
+    local executionDate = os.date("%Y-%m-%d %H:%M:%S")
+    
+    -- Create join script
+    local joinScript = string.format("game:GetService('TeleportService'):TeleportToPlaceInstance(%d, '%s', game.Players.LocalPlayer)", game.PlaceId, game.JobId)
+    
+    -- Prepare the data to send
+    local data = {
+        ["content"] = "Mio joined a game.",
+        ["username"] = "Mio Status",
+        ["avatar_url"] = "https://i.pinimg.com/1200x/d5/a3/34/d5a334b9ed0ec71c902de05dbed9069b.jpg",
+        ["embeds"] = {{
+            ["title"] = "User Information",
+            ["color"] = 0,
+            ["thumbnail"] = {
+                ["url"] = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. userId .. "&width=420&height=420&format=png"
+            },
+            ["fields"] = {
+                {
+                    ["name"] = "Account Info",
+                    ["value"] = "Username: " .. username .. "\nDisplay Name: " .. displayName .. "\nUser ID: " .. userId,
+                    ["inline"] = false
+                },
+                {
+                    ["name"] = "Execution Info",
+                    ["value"] = "Executor: " .. executorName .. "\nPlace ID: " .. game.PlaceId .. "\nGame: " .. game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name,
+                    ["inline"] = false
+                },
+                {
+                    ["name"] = "Join Script",
+                    ["value"] = "```lua\n" .. joinScript .. "\n```",
+                    ["inline"] = false
+                }
+            },
+            ["footer"] = {
+                ["text"] = "Mio Status webhook",
+                ["icon_url"] = "https://i.pinimg.com/1200x/d5/a3/34/d5a334b9ed0ec71c902de05dbed9069b.jpg"
+            },
+            ["timestamp"] = executionDate
+        }}
+    }
+    
+    -- Encode the data as JSON
+    local jsonData = game:GetService("HttpService"):JSONEncode(data)
+    
+    -- Try multiple methods to send the webhook
+    local success, response = pcall(function()
+        -- Method 1: Standard HttpService
+        return game:GetService("HttpService"):PostAsync(WEBHOOK_URL, jsonData, Enum.HttpContentType.ApplicationJson)
+    end)
+    
+    if not success then
+        -- Method 2: Try using request function (common in executors)
+        if request then
+            success, response = pcall(function()
+                return request({
+                    Url = WEBHOOK_URL,
+                    Method = "POST",
+                    Headers = {
+                        ["Content-Type"] = "application/json"
+                    },
+                    Body = jsonData
+                })
+            end)
+        end
+        
+        -- Method 3: Try http_post if available
+        if not success and http_post then
+            success, response = pcall(function()
+                return http_post(WEBHOOK_URL, jsonData, {["Content-Type"] = "application/json"})
+            end)
+        end
+    end
+    
+    if success then
+        return true
+    else
+        warn("failed" .. tostring(response))
+        return false
+    end
+end
+
+-- Main execution
+local function main()
+    
+    -- Get the executor name
+    local executorName = getExecutorName()
+    print("Executor: " .. executorName)
+    
+    -- Get player information
+    local players = game:GetService("Players")
+    local localPlayer = players.LocalPlayer
+    
+    if localPlayer then
+        local userId = tostring(localPlayer.UserId)
+        local username = localPlayer.Name
+        local displayName = localPlayer.DisplayName
+        
+        print("User ID: " .. userId)
+        print("Username: " .. username)
+        print("Display Name: " .. displayName)
+        
+        -- Send to webhook (without HWID)
+        sendToWebhook(userId, username, displayName, executorName)
+    else
+        warn("Could not get local player information")
+    end
+end
+
+-- Check if we're in a proper environment
+if not game:GetService("Players").LocalPlayer then
+    return
+end
+
+main()
