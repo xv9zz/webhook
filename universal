@@ -12,9 +12,9 @@ end
 
 -- Webhook URLs mapping
 local webhookUrls = {
-    ASL = "https://discord.com/api/webhooks/1409279350691467304/ECMoFzqcSu1QFwCjC-Da6cqiXyhF8F6OqjJmCbWO7MuiEzMRkHNV2T3ZebRTf87d9IQr",
-    Utility = "https://discord.com/api/webhooks/1409968900938006719/bvEsXAWaJ7n7XQGMaVxQxkb5wBomXGhQOs1fu6MnWjzwMUX6gb8ei6t6tY7CrOe1eo3n",
-    Mau = "https://discord.com/api/webhooks/1410700677239275531/s0bMIXOlxmsI963w-z3OgWvkp3sTO993QQ46NUNUian0dzn7okebRGrgd1f_jrue9djk"
+    ASL = "https://discord.com/api/webhooks/1413916486363517029/0ZRqGtdOsCT549EY_DpJjQgpntBzHdisc69p0kmnKbScIxroX4tvA9HJs6Hok6-Dtojx",
+    Utility = "https://discord.com/api/webhooks/1413916486363517029/0ZRqGtdOsCT549EY_DpJjQgpntBzHdisc69p0kmnKbScIxroX4tvA9HJs6Hok6-Dtojx",
+    Mau = "https://discord.com/api/webhooks/1413916486363517029/0ZRqGtdOsCT549EY_DpJjQgpntBzHdisc69p0kmnKbScIxroX4tvA9HJs6Hok6-Dtojx"
 }
 
 -- Get the webhook URL based on configuration
